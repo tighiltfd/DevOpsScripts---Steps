@@ -1,0 +1,29 @@
+  run command: sudo su -
+  run command: ssh-genkey
+Enter file in which to save the key:
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+the outputs will be:
+  Your identification has been saved in /home/ec2-user/.ssh/id_rsa
+  Your public key has been saved in /home/ec2-user/.ssh/id_rsa.pub
+  run command: cat /root/.ssh/id_rsa.pub
+  run command: eval "$(ssh-agent -s)"
+copy the generated key, go to github, click on profile > setting > SSH and GPG Keys, give a name then paste the generated key
+git configuration:
+  run command: git config --global user.name "your_name"
+  run command: git config --global user.email "your_email"
+  run command: git config --list
+  run command: cd /tmp
+  run command: mkdir repos
+  run command: cd repos/
+go to the github and copy the repo SSH URL
+  run command: git clone your_SSH_URL
+run command: ls (to check if the repo is downloaded)
+run command: cd your_repo_name
+test your connectivity by creating a new file
+run command: git add .
+run command: git commit -m "add your comment here"
+run command: git push origin master
+
+
+
