@@ -1,0 +1,98 @@
+connect to git
+very the workspace by running this command:
+  ls /var/lib/jenkins/workspace/
+  ls /var/lib/jenkins/workspace/githubInt
+go to Maven apache.org
+copy the maven Binary link
+run command:
+  cd /opt
+  wget paste_the copied_maven_URL
+  ls
+  tar -xvzf apache-maven-3.9.9-bin.tar.gz
+  ls
+  mv apache-maven-3.9.9 maven
+  cd maven
+  ls
+  cd bin
+  ls
+  ./mvn -v (./ becuase maven is only available in the current session) 
+  pwd
+  cd /
+  cd ~
+ #so we need to configure the Env varibales
+run command to locate java
+  find / -name java
+location: /usr/lib/jvm/java-17-amazon-corretto.x86_64/ 
+set other Env variables in Notepad:
+M2_HOME=/opt/maven
+M2=/opt/maven/bin
+JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto.x86_64/
+PATH=$PATH:$HOME/bin:$JAVA_HOME:$M2_HOME:$M2
+ ls -al (Look for .bash_profile)
+  nano .bash_profile
+#copy the Env varibale. It will look like this
+    # .bash_profile
+
+    # Get the aliases and functions
+    if [ -f ~/.bashrc ]; then
+            . ~/.bashrc
+    fi
+
+    M2_HOME=/opt/maven
+    M2=/opt/maven/bin
+    JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto.x86_64/
+
+    # User specific environment and startup programs
+
+    PATH=$PATH:$HOME/bin:$JAVA_HOME:$M2_HOME:$M2
+    export PATH
+run commands:
+  echo $PATH
+  exit
+  exit  (to have the added Env variables take effect)
+re-login again as root by running the echo command
+  echo $PATH
+Go back to Jenkins, click on Magane Jenkins, Tools, look for Add JDK button, give a name (java), then copy the location of Java that was found we ran find command
+/usr/lib/jvm/java-17-amazon-corretto.x86_64
+then look for Add Maven button, give a name (Maven), uncheck the Install automatically
+under MAVEN_HOME put "/opt/maven"
+click on apply and save
+Click on Plugins, Available Plugins
+search for Maven Integration, click install
+go back to the Dashboard, click New Item
+give a name (MavenInt), select Maven Project
+select Git, git the java repo URL (HelloWorld)
+Scoll down and look for option called "Goals and options" put "clean install"
+Click on Apply, Save
+click on Build Now
+go the Jenkins Instance:
+verify the workspace, copy the location (/var/lib/jenkins/workspace/MavenInt/)
+run command:
+  ls /var/lib/jenkins/workspace/MavenInt/
+  ls /var/lib/jenkins/workspace/MavenInt/webapp/
+  ls /var/lib/jenkins/workspace/MavenInt/webapp/target/
+you will see the webapp.war file (the verif is completed and AMven build is complete)
+Create new Instance and name it as tomcat, select Amazon machine Image as "Amazon Linux 2 AMI"
+Do the Inventory
+add the port 8080 sa new rule
+switch to root user
+  sudo su -
+  cd /opt
+rename the server as tomcat, then reboot it
+go to google search for "download tomcat", under download tab click on tomcat 10.1
+right click and copy link of tar.gz
+go to the instance, and run the command:
+  wget paste_tomcat_tar.gz_link
+  ls
+  tar -xvzf apache-tomcat-10.1.34.tar.gz
+  ls
+rename it by running
+  mv apache-tomcat-10.1.34 tomcat-------TBC
+
+
+
+
+
+
+
+  
