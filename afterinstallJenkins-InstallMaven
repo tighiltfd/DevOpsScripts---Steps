@@ -66,6 +66,7 @@ Scoll down and look for option called "Goals and options" put "clean install"
 Click on Apply, Save
 click on Build Now
 go the Jenkins Instance:
+  cd /opt
 verify the workspace, copy the location (/var/lib/jenkins/workspace/MavenInt/)
 run command:
   ls /var/lib/jenkins/workspace/MavenInt/
@@ -112,11 +113,38 @@ run this:
 locate these
     ./webapps/host-manager/META-INF/context.xml
     ./webapps/manager/META-INF/context.xml
-  run nano ./webapps/host-manager/META-INF/context.xml
 comment out this line by adding "<!--   -->" in both files Host-manager and Manager:
   <!--<Valve className="org.apache.catalina.valves.RemoteAddrValve"
          allow="127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1" /> -->
-then run this command to edit tomcat users.xml-------TBC
+  run nano ./webapps/host-manager/META-INF/context.xml
+  run nano ./webapps/manager/META-INF/context.xml
+then run this command to edit tomcat users.xml
+run these commands:
+  ls /opt/tomcat/
+  ls /opt/tomcat/conf/
+  nano /opt/tomcat/conf/tomcat users.xml
+copy the blow xml and add it the end of the file before the the line </tomcat-users>
+<role rolename="manager-gui"/>
+<role rolename="manager-script"/>
+<role rolename="manager-jmx"/>
+<role rolename="manager-status"/>
+<user username="admin" password="admin" roles="manager-gui, manager-script,manager-jmx,manager-status"/>
+<user username="deployer" password="deployer" roles="manager-script"/>
+<user username="tomcat" password="s3cret" roles="manager-gui"/>
+
+go the browser copy the tomcat IP addr with the port (http://54.82.5.220:8080/), click on the Server Status
+provide credential (username: tomcat, password: s3cret), you should be able to login into tomcat.
+Go back to Jenkins, click on Manage Jenkins, we need to add another plugins called "Deploy to container", then install it
+Then go back to Manage Jenkins, click on Credentials, then System, then Global credentials, then Add Credentials
+give username as "deployer", password as "deployer",ID as "tomcat_deployer", and Description as "tomcat_deployer", click Create
+
+
+
+
+
+
+
+
 
 
 
