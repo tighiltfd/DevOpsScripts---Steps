@@ -1,4 +1,4 @@
-ho $PATH
+
 connect to git
 very the workspace by running this command:
   ls /var/lib/jenkins/workspace/
@@ -165,9 +165,22 @@ create a folder and name it as repos
   ls
 install git
   yum install git -y
-go to the github, then copy the SSH link of the repo, then run this command in Developer
-generate an SSH key by running 
+Configure Git
+  git config --global user.name "your_name"
+  git config --global user.email "your_email"
 
+generate an SSH key by running 
+  ssh-genkey
+  cd /root/.ssh/
+  ls
+  eval "$(ssh-agent-s)"
+copy private key: ssh-add~/.ssh/id_rsa/ 
+  cat ~/.ssh/id_rsa.pub
+copy the key and add this in Github
+clone the repo using ssh URL
+edit the code and push it to Github to test
+
+go to the github, then copy the SSH link of the repo, then run this command in Developer
 git clone copy_SSH_link
 
 
