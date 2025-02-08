@@ -1,3 +1,4 @@
+ho $PATH
 connect to git
 very the workspace by running this command:
   ls /var/lib/jenkins/workspace/
@@ -102,7 +103,7 @@ if not installed, run this
 run again
   ./startup.sh
 verify tomcat if it is up and running, copy the public ip addr with port 8080 go to google browser
-if you clisck on Server Status in tomcat page, you will see all the errors (access denied)
+if you click on Server Status in tomcat page, you will see all the errors (access denied)
 now, we need to change the configuration for tomcat, need to check 2 files Hostmanager and Manager
 before that, go back to tomcat folder
   cd ..
@@ -137,6 +138,38 @@ provide credential (username: tomcat, password: s3cret), you should be able to l
 Go back to Jenkins, click on Manage Jenkins, we need to add another plugins called "Deploy to container", then install it
 Then go back to Manage Jenkins, click on Credentials, then System, then Global credentials, then Add Credentials
 give username as "deployer", password as "deployer",ID as "tomcat_deployer", and Description as "tomcat_deployer", click Create
+Go back to Jenkins dashboard, Click on MavenInt, then click on Configuration, 
+Scroll down to git, then copy the git URL, then go back to the Dashboard again, Click on New Item
+Give a name as mavencicd, select Maven project, then click on OK, scroll down to git, select it, then paste the git URL
+Scroll down to Goals and options, put "clean install"
+Scroll down to Add post-build action, then select Deploy war/ear to a container,
+at WAR/EAR Files field put "**/*.war"
+in the same page, go to Add Container, select the latest version of tomcat (Tomcat 9.x Remote)
+At Credentials field select deployer/*****(tomcat_deployer), then copy paste the tomcat IP addr with port (
+http://35.172.219.238:8080/)
+Click on Apply, and Save
+Click on Build Now button
+Go back to the browser that has tomcat Ip addr and port and add to it "webapp" like this: http://35.172.219.238:8080/webapp/
+you should see the page of the HelloWorld html (in our case PIIT user Registration page)
+Now, go back to the pipeline project (mavencicd) in Jenkins, click on Configuration, 
+then scroll down to Triggers section, then select "Poll SCM", then type "* * * * *" in the schedule (this means that will run every minute)
+click on Apply and Save
+
+Create a 3rd EC2 Instance, name it as Developer
+login as root
+go to tmp by running
+  cd /tmp
+create a folder and name it as repos
+  mkdir repos
+  cd repos
+  ls
+install git
+  yum install git -y
+go to the github, then copy the SSH link of the repo, then run this command in Developer
+generate an SSH key by running 
+
+git clone copy_SSH_link
+
 
 
 
