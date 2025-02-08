@@ -1,4 +1,3 @@
-
 connect to git
 very the workspace by running this command:
   ls /var/lib/jenkins/workspace/
