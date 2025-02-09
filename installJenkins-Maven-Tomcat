@@ -177,10 +177,24 @@ go to the github and copy the repo SSH URL
   run command: git clone your_SSH_URL
 run command: ls (to check if the repo is downloaded)
 run command: cd your_repo_name
-test your connectivity by creating a new file
+run command: ls
+run command: cd webapp/
+run command: ls
+run command: cd src
+run command: ls
+run command: cd main/
+run command: ls
+run command: cd webapp/
+run command: ls
+run command: nano index.jsp
+make a change in index.jsp (chnage in the title)
+Save
 run command: git add .
 run command: git commit -m "add your comment here"
 run command: git push origin master
+since we set teh trigger to every min, then will take around 1 min to trigger the build in jenkins
+
+Create new Instance for SonarQube
 
 
 
