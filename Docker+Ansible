@@ -1,1 +1,288 @@
+Create Instances for Jenkins with: 
+Instance type: t2.medium, select east 1a subnet, paste the Jenkins and git info in the advanced settings
+Update the inventory by copying the Ip addr, private Ip addr, and the ssh -i connection.
+edit the Inbound rules by adding the 8080 port to the security group.
+Connect to the Jenkins Instance server
+rename, the server
+  sudo nano /etc/hostname
+reboot it
+  reboot
+login as sudo
+sudo su -
+Verify the site is up by pasting the Ip addr and the 8080 port in the browser.
+Copy the location of the initialAdminPassword
+run
+  cat /var/lib/jenkins/secrets/initialAdminPassword
+Copy the generated password and paste it in the Admin password field
+Select the suggested plugin
+Click on New Item, give it a name githubIntegration, select git, copy the http of the repo aand paste it in the indicated field
+
+Go to the browser, look for download maven, look for the Binary tar.gz archive link, copt the link
+Go abck the Jenkins server, go to opt folder
+  cd /opt
+  pwd
+install maven by running:
+  wget paste_the _copied_link.
+  ls
+Unzip or extract the file by running
+  tar -xvzf apache-mavem.....
+  ls
+rename maven
+  mv apache-maven...... maven
+  ls maven
+We can delete the tar file
+  rm -f apache-maven.....
+  ls
+Next, Maven is accessible only from its current location, and if we run this:
+ ./mvn -v
+No such a file error
+Go inside of maven
+  cd maven/bin
+Now, if we run this:
+  ./mvn -v
+we will be able to see it
+in order to access maven from anywhere we need to set some of the Env variables....
+these Env Variables will de added to the .bash_profile file located into home folder
+To go to home folder, run
+  cd ~
+  pwd
+  ls -ll
+verify if java is already installed
+  find / -name java
+copy the java location from /usr/......x86_64/
+locate the bash_profile
+  ls -al
+  nano .bash_profile
+add these:
+  M2_HOME=/opt/maven
+  M2=/opt/maven/bin
+  JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto.x86_64
+then add these after the line # User specific environment and startup programs
+  PATH=$PATH:$HOME/bin:$JAVA_HOME:$M2_HOME:$M2
+  export PATH
+To validate this by echoing the $PATH
+  echo $PATH
+You will see that the path wasn't update
+exit from root
+  exit
+exit from user
+  exit
+log back into the server
+as root
+  sudo su -
+run the echo again
+  echo $PATH
+Now, you will see that the path get updated
+And if we do
+  mvn -v
+will locate the maven
+Go back to jenkins site, click on Manage Jenkins, Plugins, type maven, select Maven Integration and install
+Back to Manage Jekins, Tools, add JDK, give a name as java, add the location under Java_Home (java env var   /usr/lib/.....x86_64)
+Add Maven, give a name as Maven, location as /opt/maven, uncheck the Install Automatically, save
+Back to jenkins Dashboard, click on New Item, give it a name (mavenIntegration), select Maven project, click ok
+Select git, give the HTTPS URL of the repo, 
+Go to Goal and options, type "clean install", Save
+Click on Build Now, then console output
+We canverify that manually by running the command:
+  ls /var/lib/jenkins/worspace/mavenIntegration
+We gonna see it get downloaded and the webapp get created
+we can go under webapp
+  ls /var/lib/jenkins/worspace/mavenIntegration/webapp/target/
+you will see the webapp.war
+
+Create another Insatnce for Ansible
+give it a name, t2.medium, subnet= east 1a,
+under Summary (on the right screen), increase the number of the instances to 2 (1 for the hostname, and the 2nd for the control node)
+Configure Storage as 15 MB, 
+rename the ansilbe instances as AnsibleControlNode) and the 2nd as (AnsibleHost)
+Get the Inevntory (IP addr, ssh -i, private Ip addr)
+Login to Ansible Control Node
+rename it
+  sudo nano /etc/hostname
+(ansibleControl)
+reboot
+login as root
+  sudo su -
+Do same for the 2nd instance
+Install the 1st pre-requisite for Ansible which is installing python
+  yum install python -y
+install python-pip  (System Package Installation)
+  yum install python-pip -y
+install ansible via pip (Python Package Installation)
+  pip install ansible
+verify if ansible is install
+  ansible --version
+we need to create a directory under ansible folder to make sure that we add the host file in there
+if we run,
+  ls /etc/ansible
+we don't see such a file/folder
+  mkdir /etc/ansible
+  ls /etc/ansible
+we need to create an ansible useradmin to be used for ansible operations and to manage the Node
+  useradd ansibleadmin
+  passwd ansibleadmin
+we need to add the ansibe user admin (ansibeadmin) to the sudoer file
+  echo "ansibleadmin ALL=(ALL) NOPASSWD:  ALL" >> /etc/sudoers
+This would allow the user ansibleadmin to execute any command as root without being prompted for a password. 
+We can verify this by running:
+  cat /etc/sudoers
+At the end of the file, you will see the created user (ansibleadmin) has been added 
+Now, ansible server is used to create image and store it in docker.
+Ansible automates Docker image creation and storage, reducing manual effort.
+  yum install docker -y
+  systemctl start docker
+  systemctl enable docker
+  systemctl status docker
+This means that this server has the capability to pull the image and create the container from the ansibe server
+we need add the ansibleadmin to our docker group
+  usermod -aG docker ansibleadmin
+verfiry this by running
+  id ansibleadmin
+we can see that the user (ansibleadmin) is now a member of the docker group
+Enable password based autentication in the SSH server configuration file
+  nano /etc/ssh/sshd_config
+This file controls how the SSH daemon (sshd) behaves on the server. This file is critical for managing SSH security and access.
+Restart the sshd service so the change can take effect
+  systemctl restart sshd
+Test this by running coping the ansible control node IP add, go the file we store the key pair.pem, right click, then click on "Open Git Batch here"
+type:
+  ssh ansibleadmin@ansible_Ip_addr 
+click yes, the it should prompt for a password and oesn't require a key pair or private key
+change the user from root to ansibleadmin
+  sudo su ansibleadmin
+  whoami
+Now, we need to generate an SSK key, before that, The reason we configure password-based authentication in the SSH server (/etc/ssh/sshd_config)
+while also generating SSH key pairs (ssh-keygen) is about balancing security and accessibility.
+  ssh-keygen
+locate the public (id_rsa.pub) and the private (id_rsa) keys
+Before we proceed, 
+we need to go to the Host machine, and use root user
+  sudo su -
+enable the password based authentication in the SSH server configuration file, 
+  nano /etc/ssh/sshd_config
+change the PasswordAutentication yes
+  restart the service sshd
+  systemctl restart sshd
+So far, we can login to host with the password....we can test that by creating a user (ansibleadmin) and try to login with the password only,
+Or, login to Host via the Cntrol Node by running ssh ec2-user@private_ip_addr, then it will prompt for a password
+Since we need the ansibleadmin user anyway, so we gonna create it
+  useradd ansibleadmin
+  passwd ansibleadmin
+But, since The 2nd goal would be to copy the key from the Conrol Node to the Host so that we can make it passwrodless autentication.
+How that works....
+Go to the Control Node...
+  pwd
+will show /root
+  whoami
+ansibleadmin
+we need to go the home folder
+  cd ~
+  pwd
+will show /home/ansibleadmin
+  ls -all
+will show the .ssh folder that is where the ssk key is stored.
+we gonna copy the ssh key, by running:
+  ssh-copy-id ansibleadmin@private_Ip_addr
+It prompt for a password, then will show: Number of key(s) added: 1
+Now, run this:
+  ssh ansibleadmin@host_private_IP_addr
+it should not prompt for a password nad it will allow you to login to the Host via the Control Node
+It should also show the name of the machine as Host, although we were using Control Node
+  whoami
+will show ansibleadmin
+if you exit
+  exit
+you will be able to go back to the Control Node, and the user as ansibleadmin from the control Node
+Previously we created a folder named ansible under /etc/
+  ls /etc/ansible/
+create a file (hosts) under ansible folder
+The /etc/ansible/hosts file is the default inventory file, will be used by Ansible to define and manage 
+remote machines (hosts) that Ansible will control. Without this file, Ansible wouldn’t know which machines to connect to.
+  nano /etc/ansible/hosts
+have the Host machine private IP addr and localhost, like this:
+  172.31.83.110
+  localhost
+save it
+To validate this, we need to run:
+  ansible all -m ping
+Go with yes to "Are you sure .....", then Yes, then hit Enter
+You will get a Failed message
+At this point we need 2 things, first login with the ansible user (ansibleadmin), 2nd We need to copy the SSH key 
+  sudo su - ansibleadmin
+  pwd
+  shh-copy-id localhost
+Enter password, it will confirm that the key was added
+To validate (check the connectivity), we should run the ping command again
+  ansible all -m ping
+You should get a successful messages for localhost and the private IP addr with message "pong"
+Now, we need to integrate ansible with Jenkins
+Go to Ansible Control Node, make sure the logged user is root
+  whoami
+should return root
+Go to /opt
+  cd /opt
+create a folder named docker
+  mkdir docker
+  cd docker
+  ls -l
+  cd ..
+change the ownership and the group of docker folder
+  chown -R ansibleadmin:ansibleadmin /opt/docker
+  ls -l /opt
+you will see that docker folder has changed the ownership and the group from root to ansibleadmin
+Go to Jenkins Server,click on Manage Jenkins, Plugins, search for SSH, select Publish Over SHH, click Install
+Back to Manage Jenkins, click on System, scroll down, then cilck on Add under SSH Servers
+Give it a name as ansibleControl, hostname as the ansible control Node private IP Addr, the username as ansibleadmin
+Then click on Advanced, radio check where it says "Use password autehntication, or use a different key", enterthe password in the password field
+Click on save
+Click on New Item, give a name as ansibleIntegration, in the Copy from field, type "MavenIntegration" since we have it created previously, the click Ok
+Under Post Steps, at the Add post-build step, select "Send files or execute commands over SSH"
+Under Transfers, in the Source files, type "webapp/target/*.war", at the Remove prefix type "webapp/target"
+at the Remote directory, type //opt/docker
+click on Save
+It should trigger a build
+To validate the connection, go to Jenkins machine, run
+  ls /var/lib/jenkins/workplace/ansibleIntegration/webapp/target/
+You will see the webapp.war file
+Also, go to the ansible Control Node machine, run
+  ls /opt/docker
+You will see the webapp.war file
+Now, we have to create an image for docker and create a container
+login as ansibleadmin
+  su - ansibleadmin
+  whoami
+Go to the /opt/docker folder
+  cd /opt/docker/
+  ls
+  ls -ld
+Create a dockerfile
+  nano Dockerfile
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
 
