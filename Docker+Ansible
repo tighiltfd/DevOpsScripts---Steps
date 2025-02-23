@@ -103,8 +103,8 @@ rename it
 reboot
 login as root
   sudo su -
-Do same for the 2nd instance
-Install the 1st pre-requisite for Ansible which is installing python
+Do same for the 2nd instance (anshost)
+Install the 1st pre-requisite for Ansible which is installing python on Control Node
   yum install python -y
 install python-pip  (System Package Installation)
   yum install python-pip -y
@@ -126,7 +126,7 @@ we need to add the ansibe user admin (ansibeadmin) to the sudoer file
 This would allow the user ansibleadmin to execute any command as root without being prompted for a password. 
 We can verify this by running:
   cat /etc/sudoers
-At the end of the file, you will see the created user (ansibleadmin) has been added 
+At the end of the file, you will see the created user (ansibleadmin ALL=(ALL) NOPASSWD: ALL) has been added 
 Now, ansible server is used to create image and store it in docker.
 Ansible automates Docker image creation and storage, reducing manual effort.
   yum install docker -y
@@ -141,17 +141,20 @@ verfiry this by running
 we can see that the user (ansibleadmin) is now a member of the docker group
 Enable password based autentication in the SSH server configuration file
   nano /etc/ssh/sshd_config
+PasswordAuthentication change "no" to "yes"
+Save
 This file controls how the SSH daemon (sshd) behaves on the server. This file is critical for managing SSH security and access.
 Restart the sshd service so the change can take effect
   systemctl restart sshd
 Test this by running coping the ansible control node IP add, go the file we store the key pair.pem, right click, then click on "Open Git Batch here"
 type:
   ssh ansibleadmin@ansible_Ip_addr 
-click yes, the it should prompt for a password and oesn't require a key pair or private key
+click yes, the it should prompt for a password and doesn't require a key pair or private key
+exit from it
 change the user from root to ansibleadmin
   sudo su ansibleadmin
   whoami
-Now, we need to generate an SSK key, before that, The reason we configure password-based authentication in the SSH server (/etc/ssh/sshd_config)
+Now, we need to generate an SSH key, before that, The reason we configure password-based authentication in the SSH server (/etc/ssh/sshd_config)
 while also generating SSH key pairs (ssh-keygen) is about balancing security and accessibility.
   ssh-keygen
 locate the public (id_rsa.pub) and the private (id_rsa) keys
@@ -161,11 +164,11 @@ we need to go to the Host machine, and use root user
 enable the password based authentication in the SSH server configuration file, 
   nano /etc/ssh/sshd_config
 change the PasswordAutentication yes
-  restart the service sshd
+restart the service sshd
   systemctl restart sshd
 So far, we can login to host with the password....we can test that by creating a user (ansibleadmin) and try to login with the password only,
 Or, login to Host via the Cntrol Node by running ssh ec2-user@private_ip_addr, then it will prompt for a password
-Since we need the ansibleadmin user anyway, so we gonna create it
+Since we need the ansibleadmin user anyway on Host machine, so we gonna create it
   useradd ansibleadmin
   passwd ansibleadmin
 But, since The 2nd goal would be to copy the key from the Conrol Node to the Host so that we can make it passwrodless autentication.
@@ -179,14 +182,14 @@ we need to go the home folder
   cd ~
   pwd
 will show /home/ansibleadmin
-  ls -all
+  ls -al
 will show the .ssh folder that is where the ssk key is stored.
 we gonna copy the ssh key, by running:
   ssh-copy-id ansibleadmin@private_Ip_addr
 It prompt for a password, then will show: Number of key(s) added: 1
 Now, run this:
   ssh ansibleadmin@host_private_IP_addr
-it should not prompt for a password nad it will allow you to login to the Host via the Control Node
+it should not prompt for a password and it will allow you to login to the Host via the Control Node
 It should also show the name of the machine as Host, although we were using Control Node
   whoami
 will show ansibleadmin
