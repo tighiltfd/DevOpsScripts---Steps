@@ -1,0 +1,104 @@
+Project: Linux Apache Mariadb PHP (LAMP)
+
+Step 1:
+go to /tmp, Copy and paste the following commands, create a bash script as lamp.sh and run this to install LAMP
+cd /tmp
+nano lamp.sh
+ls -ll lamp.sh
+add execute permission: chmod u+x lamp.sh
+ls -ll lamp.sh
+./lamp.sh
+
+**Script Start
+sudo dnf upgrade -y
+sudo dnf install -y httpd wget php-fpm php-mysqli php-json php php-devel
+sudo dnf install -y mariadb105-server
+sudo systemctl start httpd
+sudo systemctl enable httpd
+sudo usermod -a -G apache ec2-user
+sudo chown -R ec2-user:apache /var/www
+sudo chmod 2775 /var/www && find /var/www -type d -exec sudo chmod 2775 {} \;
+find /var/www -type f -exec sudo chmod 0664 {} \;
+echo "<?php phpinfo(); ?>" > /var/www/html/phpinfo.php
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+**Script End
+
+Step 2:
+Test the Apache Web Server http://publicipofec2instance/phpinfo.php
+Remove the phpinfo.php file: sudo rm /var/www/html/phpinfo.php
+
+Step 3:
+Secure the database server
+
+sudo systemctl start mariadb
+sudo mysql_secure_installation
+
+Press Enter for current password
+Type N Not to switch to the Unix Socket Mode
+Type Y to set a root password
+Type Y to remove the anonymous user accounts.
+Type Y to disable the remote root login.
+Type Y to remove the test database.
+Type Y to reload the privilege tables and save your changes.
+
+sudo systemctl stop mariadb
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
+
+Step 4:
+go to /var/www/html, Copy and paste the following commands, create a bash script as phpmyadmin.sh and run this to install phpmyadmin
+cd /var/www/html
+ls -ll phpmyadmin.sh
+add execute permission: chmod u+x phpmyadmin.sh
+ls -ll phpmyadmin.sh
+./phpmyadmin.sh
+
+cd /var/www/html
+
+**Start Start
+sudo dnf install php-mbstring php-xml -y
+sudo systemctl restart httpd
+sudo systemctl restart php-fpm
+wget https://www.phpmyadmin.net/downloads/phpMyAdmin-latest-all-languages.tar.gz
+mkdir phpMyAdmin && tar -xvzf phpMyAdmin-latest-all-languages.tar.gz -C phpMyAdmin --strip-components 1
+rm phpMyAdmin-latest-all-languages.tar.gz
+sudo systemctl start mariadb
+**Start End
+
+Test it: http://publicipofec2instance/phpMyAdmin
+
+Enter root user ID and Password
+
+Project: Schdule a cronjob that will back everything from mysql server to different location
+
+sudo dnf install cronie rsync -y
+systemctl enable crond
+sudo systemctl enable crond
+sudo systemctl start crond
+sudo systemctl status crond
+mkdir /tmp/wust
+
+Edit the crontab file: Use the crontab command to edit the cron jobs for your user:
+crontab -e
+
+Add the rsync job: Add the following line to run rsync every minute. Replace /source/directory and /destination/directory with your actual paths. Press Ins to start typing
+
+* * * * * rsync -av --delete /source/directory/ /destination/directory/
+Example:
+* * * * * rsync -av --delete /var/lib/mysql /tmp/wust
+
+Save and exit the crontab editor. Press Esc, type :wq and press enter to exit
+
+-a: Archive mode (preserves permissions, timestamps, symbolic links, etc.).
+-v: Verbose output (optional).
+--delete: Deletes files in the destination that are not in the source (ensures exact mirroring).
+
+Verify the Cron Job
+crontab -l
+
+Wait for a minute
+
+Check cron logs for execution
+sudo journalctl -u crond -f
+ls /tmp/wust/
