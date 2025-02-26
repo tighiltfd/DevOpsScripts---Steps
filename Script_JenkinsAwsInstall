@@ -29,3 +29,10 @@ sudo systemctl start jenkins
 #You can check the status of the Jenkins service using the command:
 sudo systemctl status Jenkins
 
+#Install git
+sudo yum install git -y
+
+#Initialize git
+sudo git init
+
+
