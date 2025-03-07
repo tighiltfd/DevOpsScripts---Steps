@@ -28,9 +28,112 @@
 
 #Do the inventory (IP addr, private IP addr, connection string)
 #add 8080 port
+#change the name by runnung:
+  sudo nano /etchostname/
+  reboot
 #go to the browser, type the Jenkins IP addr along side with the 80808 port
 #copy this path /var/lib....../initialAdminPassword
 #Back to Jenkins machine, run
   cat var/lib/...../initialAdminPassword
 #Copy the temporary key, go to the Jenkins site, paste and get started
+Integrate Git with Jenkins, by cloning the repo using the https of the repo (any repo)
+New Item, give a name as GitIntegration, Freestyle project, ok
+Select git past the https of the repo
+verify the branch and save
+Click Build Now, console output
+you can verify by copy the workplace path, go to the jenkins machine, and run:
+  ls /var/lib...../gitintegration
+Now, we need to integrate Maven
+login as root
+  sudo su -
+  cd /opt
+go to google, search for download Maven, copy the binary tar link
+back to jenkins machine, run
+  wget the_copied_maven_link
+to veify that maven is installed
+  ls -ll
+#Maven is right there
+Now, we need to unzip
+  tar -xvzf apache-maven....
+Rename the extracted Maven
+  mv apache-maven.... maven
+  ls
+  cd maven
+  cd bin
+  ./mvn -v
+mavnen is working but in oder to have it accessible from anywhere we need to set the environment variables
+Before that we need to make sure that java is installed:
+  find / -name java
+copy /usr/lib/......x86_64 and added to the inventory
+## Location for Java is  /usr/lib/jvm/java-17-amazon-corretto.x86_64
+## Location for Maven is /opt/maven
+  cd ~
+  ll -a
+## Add the below in .bash_profile
+  nano .bash_profile
+  M2_HOME=/opt/maven
+  JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto.x86_64
+# User specific environment and startup programs
+  export PATH=$PATH:$HOME/bin:$JAVA_HOME:$M2_HOME/bin
+#Save
+  $PATH
+#The changes were not saved yet
+#exit so the changes will take effect
+  exit
+  exit
+#Relogin to the server
+#use root
+  sudo su -
+  $PATH
+#The chnages are now reflecting
+#So, now maven can be accessible from anywhere.
+#Now, we need to integrate Jenkins with Maven
+#Go To Jenkins site, Manage Jenkins, Plugins, type maven
+#Selet Maven Integration, and the install
+#Bakc to Manage Jenkins, Tools, click on Add JDK, give name as java, copy paste the java path "/usr/lib/jvm/java-17-amazon-corretto.x86_64" under JAVA_HOME
+#Scroll down to Add Maven, click on it, give name as Maven, uncheck the Install automatically, cop paste "/opt/maven" in MAVEN_HOME
+#Save
+#Go to github, find the helloword repo, copy the https,
+#Go to Jenkins Dashboard, new Item, give name as "MavenIntegration, select Maven project, click Ok
+#Scroll down to Git, select it, paste the https url of the helloworld repo, verify the branch
+#Scroll down to Goals and options type "clean install" means completely removing an existing system, software, or application and reinstalling it from scratch. 
+#Save
+#Clcik on Build Now, console outputs, copy the workspace /var/lib/...MavenIntegration
+Back to Jenkins machine
+  ls /var/lib/...MavenIntegration
+  ls /var/lib/...MavenIntegration/webapp/target/
+#webapp.war is there
+#Now, we need to launch another ec2 instance for Docker
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
