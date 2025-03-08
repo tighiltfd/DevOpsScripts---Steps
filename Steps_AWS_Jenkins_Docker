@@ -104,19 +104,114 @@ Back to Jenkins machine
   ls /var/lib/...MavenIntegration/webapp/target/
 #webapp.war is there
 #Now, we need to launch another ec2 instance for Docker
+Go to aws console, name as Docker, instance type as te.medium, key pair, storage as 20 GB
+Do the inventory
+lanch a new machine for Docker
+  sudo su -
+rename the machine
+  nano /etc/hostname
+  reboot
+go back to the docker instance and add ports 8080 for Docker and 8081 - 8090 for the containers
+Now, we need to install Docker, go to the docker machine
+  yum install docker -y
+check it
+  systemctl status docker
+Start the service
+  systemctl start docker
+Enable the service
+  systemctl enable docker
+Now, go to google, search for hub.docker.com
+in the search field, search for tomcat, copy the command 
+  docker pull tomcat
+It will take the version as latest by default (if you didn't specify it)
+these 2 commands are same
+  docker pull tomcat 
+  docker pull tomcat:latest
+we can verify that the tomcat image is downloaded
+  docker images
+returns the tomcat image with tag as latest, and ID
+so far, we only downloaded an image,
+To create a container we need to run this:
+  docker run --name conatiner1 -p 8081:8080 tomcat:latest
+#Container1: is the name
+#-p 8081:8080 is the port
+#tomcat:latest is the image with its tag
+#-p for ports
+The conatiner is now running
+Copy the docker ip addr, paste it to the browser with port 8081
+You will get 404 not found but the response came from Apache Tomcat with version. which means the tomcat server is up and running 
+to see if the container was created, run
+  docker ps -a
+The container1 will be returned
+So, what we did so far was:
+to check the downloaded image, we run
+  docker images
+to check the container, we run
+  docker ps -a
+to run the docker server we run:
+  docker run --name conatiner1 -p 8081:8080 tomcat:latest
+to run a stopped container, we run:
+  docker start container1
+to verify, run:
+  docker ps -a
+the active container will be returned
+  docker exec -it container1 /bin/bash
+This above command opens an interactive Bash shell inside the running Docker container named container1. It lets you execute commands as if you were inside a Linux terminal within that container.
+#docker exec → Runs a command inside an already running Docker container.
+#-i (interactive) → Keeps the session open for input.
+#-t (tty) → Allocates a pseudo-terminal (TTY), making it behave like an interactive shell.
+#container1 → The name (or container ID) of the running container where the command should be executed.
+#/bin/bash → Starts a Bash shell inside the container, allowing interactive command execution.
+if I do pwd
+  pwd
+I'm in the home folder
+To check the contents:
+  ls
+#Within the contents, I see a folder caller webapps.dist. Its purposes are:
+##It serves as a backup of the default web applications that come with Tomcat (like ROOT, docs, examples, and manager).
+#When Tomcat starts, it copies web applications from webapps.dist to the webapps/ directory if webapps/ is empty.
+#This ensures that the default web applications are available if webapps/ is deleted or cleared.
+#How it works:
+If you remove everything from /usr/local/tomcat/webapps/ and restart the container, Tomcat will restore default applications from webapps.dist/.
+If you manually deploy your .war files in /usr/local/tomcat/webapps/, Tomcat will use those instead of the defaults.
 
-
-
-
-
-
-
-
-
-
-
-
-
+#Now we need to rename the webapps.dist
+#Renaming webapps.dist is mainly done to prevent Tomcat from restoring default applications, ensuring a clean deployment for your web apps.
+  mv webapps webapps1
+  mv webapps.dist webapps
+#To verify
+  ls
+#Now, if you refresh the screen wher you had docker IPaddr with port 8081, you will see the apache tomcat page with a congratulations message.
+#to come out form the container, we need to exit
+  exit
+so, now, we out of the container and are on the docker server
+To delete the created container, we run:
+  docker rm -f container1
+to veirfy
+  docker ps -a
+No container was returned
+to delete an image
+  docker rmi copy_paste_the_image_id
+to verify:
+  docker images
+No image would be returned
+Let's download an image one more time
+  docker pull tomcat:latest
+to create a container
+  docker run -d --name container2 -p 8082:8080 tomcat:latest
+#-d means in a detached mode, meaning you can leave the station and still your container is running
+To verify, copy paste the docker IPaddr with port 8082, you will see that tomcat server is up and running
+In order to rename the webapps.dist, we need to login to the container
+  docker exec -it container2 /bin/bash
+  ls
+  mv webapps webapps2
+  mv webapps.dist webapps
+Refresh the page of the tomcat server that has Ip addr with port 8082
+it should show the congratulations message
+Exit from the conrtainer2
+  exit
+run
+  docker ps -a
 
 
 
