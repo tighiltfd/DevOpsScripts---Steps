@@ -212,11 +212,69 @@ Exit from the conrtainer2
   exit
 run
   docker ps -a
-
-
-
-
-
+Now, we need to create docker user (dockeradmin) in the docker host server and add it to the docker group
+Go to docker server (machine), and run
+  useradd dockeradmin
+  passwd dockeradmin
+add this user to the docker group
+  usermod -aG docker dockeradmin
+to verify
+  id dockeradmin
+You will see that dockeradmin is part of the docker group
+We also, need to enable password authentication
+  ls /etc/ssh/
+We need to edit in this file ssh_config
+  nano /etc/ssh/sshd_config
+Locate the line where it says "PasswordAutenthication no", chnage the "no" to "yes", then save it
+This change is needed to allow the dockeradmin to login to the docker server to set the ssh authentication
+Start the sshd service
+  systemctl start sshd
+#All of this is needed to integrate docker with Jenkins
+#Go To Jenkins, Manage Jenkins, Plugins, type "Publish Over Ssh", install
+#Go to Manage Jenkins again, System, Scroll down to the SSH Server, click Add
+#Give it a name as "Docker", at Hostname, pu the docker private IP addr, at username give "dockeradmin",
+#Scoll down to Advanced, check where it says "Use password authentication, or use a different key"
+#At the Passphrase/Password, type the dockeradmin password that we created previously
+#Now to test this configuration, scroll down, at the battom right corner, click on "Test Configuration"
+#It should show "Success", click on Save
+#Click on New Item, give it a name as "DockerIntegration", select Maven project, click OK
+#Over to Git, copy paste the HTTPS URL of the hellowWorld Repo, verify the branch, scroll dwn to Goals and options "clean install package"
+###clean: This removes the target directory (previous build artifacts) to ensure a fresh build.
+###install: This compiles the code, runs tests, and installs the generated JAR/WAR file into the local Maven repository (~/.m2/repository).
+###package: This explicitly ensures that the application is packaged into a deployable format (JAR, WAR, etc.).
+###While install does implicitly include package, explicitly specifying package ensures that the necessary artifacts are created before the installation.
+###Some Jenkins pipelines might use Docker to build and package the application, but not install dependencies into the local repository. 
+###In such cases, package guarantees the output artifact exists before Docker picks it up.
+At Add post-build action, select "Send build artifacts over SSH", 
+At Transfer Set section, in the Source files, type "webapp/target/*.war"
+###Specifies which files to transfer.
+###Matches all .war files in the webapp/target/ directory.
+###Typically used in Java-based web applications (e.g., built with Maven or Gradle).
+At Remove prefix, type "webapp/target"
+What does this mean?
+###Ensures that the .war files are uploaded without retaining the webapp/target/ directory structure.
+###If not removed, the files might be stored in a nested directory on the remote server (docker server) instead of directly in the intended location.
+#At Remote directory type "." this means "Use the default directory on the remote server."
+click Save
+Run the Build by clicking on Build now, should show no errors.
+#Go to Console output, will show success at the end
+to verify the docket integration with jenkins, go to Jenkins machnine
+  ls /var/lib/jenkins/.....DockerIntegration
+  ls /var/lib/jenkins/.....DockerIntegration/webapp
+  ls /var/lib/jenkins/.....DockerIntegration/webapp/target/
+you will see the artifact (webapp.war) that we downloaded onto our jenkins
+Now, let's logon to the docker server,
+  pwd
+  ls
+  ls /home/dockeradmin/
+you will see that webapp.war is there. This means that the /home/dockeradmin/ directory contains that file
+Next step is to deploy this .war to a container.
+Login as dockeradmin
+  su dockeradmin
+  whoami
+  pwd
+  cd ~
+Now we need to edit the Dockerfile
 
 
 
