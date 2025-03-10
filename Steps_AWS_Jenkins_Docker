@@ -274,12 +274,40 @@ Login as dockeradmin
   whoami
   pwd
   cd ~
-Now we need to edit the Dockerfile
-
-
-
-
-
+Now we need to edit the Dockerfile by adding these commands into the Dockerfile
+  FROM tomcat:latest
+  MAINTAINER Jamal Tighilt
+  COPY ./webapp.war /usr/local/tomcat/webapps
+  nano Dockerfile
+Next, is to create a docker image
+  docker images
+the image is created.
+Let's create an image out of the artifacts that we have (webapp.war)
+  docker build -t devopsdockerimage1 .
+  ls
+  docker images
+You will see that now we have 2 images
+Now, we need to create a container
+  docker run -d --name devopscontainer1 -p 8083:8080 devopsdockerimage1:latest
+If we go to the browser, paste the docker IP addr with the port 8083, it will show the 404 error, but will see the response was from Apache Tomcat with version
+Now, go back to Jenkins site, select DockerIntegration, Configure, Scoll down to Post Build Actions, locate the field named "Exec command",
+type "cd /home/dockeradmin; docker build -t devopsdockerimage1 .; docker run -d --name devopscontainer1 -p 8084:8080 devopsdockerimage1;"
+  cd /home/dockeradmin; docker build -t devopsdockerimage1 .; docker run -d --name devopscontainer1 -p 8084:8080 devopsdockerimage1;
+###cd /home/dockeradmin; Changes the current directory to /home/dockeradmin, where the Dockerfile is likely located.
+###docker build -t devopsdockerimage1 .; Builds a Docker image from the Dockerfile in the current directory (.).
+###-t devopsdockerimage1 tags the image with the name devopsdockerimage1.
+###docker run -d --name devcon5 -p 8084:8080 devopsdockerimage1; 
+  ###Runs a container in the background (-d for detached mode).
+  ###Assigns the container the name devcon5 (--name devcon5).
+  ###Maps port 8084 on the host to 8080 inside the container (-p 8084:8080).
+  ###Runs the container from the devopsdockerimage1 image.
+Before running this, go back to the docker machine, then remove the webapp.war file (because the war file will be created through the above commad in Jenkins
+  rm -f webapp.war
+Now go back to Jenkins site, click on Build now, the build is created successfully
+To verify, go to Docker machine, run this
+  docker ps -a
+you will see that the conatainer devopscontainer1 was creted and running,
+We can also verify this through the IPaddr and the port 8084
 
 
 
