@@ -1,29 +1,29 @@
 #Create a Jenkins EC2 instance, Instance type as t2.medium, Key pair, subnet, storage as 8 GB, 
 #at advanced paste this:
-#Downloading and installing Jenkins
-#Completing the previous steps enables you to download and install Jenkins on AWS. To download and install Jenkins:
-#Ensure that your software packages are up to date on your instance by using the following command to perform a quick software update:
+###Downloading and installing Jenkins
+###Completing the previous steps enables you to download and install Jenkins on AWS. To download and install Jenkins:
+###Ensure that your software packages are up to date on your instance by using the following command to perform a quick software update:
   sudo yum update –y
-#Add the Jenkins repo using the following command:
+###Add the Jenkins repo using the following command:
   sudo wget -O /etc/yum.repos.d/jenkins.repo \
     https://pkg.jenkins.io/redhat-stable/jenkins.repo
-#Import a key file from Jenkins-CI to enable installation from the package:
+###Import a key file from Jenkins-CI to enable installation from the package:
   sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
-#upgrade the Instance:
+###upgrade the Instance:
   sudo yum upgrade
-#Install Java (Amazon Linux 2023):
+###Install Java (Amazon Linux 2023):
   sudo dnf install java-17-amazon-corretto -y
-#Install Jenkins:
+###Install Jenkins:
   sudo yum install jenkins -y
-#Enable the Jenkins service to start at boot:
+###Enable the Jenkins service to start at boot:
   sudo systemctl enable jenkins
-#Start Jenkins as a service:
+###Start Jenkins as a service:
   sudo systemctl start jenkins
-#You can check the status of the Jenkins service using the command:
+###You can check the status of the Jenkins service using the command:
   sudo systemctl status Jenkins
-#Install git
+###Install git
   sudo yum install git -y
-#Initialize git
+###Initialize git
   sudo git init
 
 #Do the inventory (IP addr, private IP addr, connection string)
@@ -303,17 +303,24 @@ type "cd /home/dockeradmin; docker build -t devopsdockerimage1 .; docker run -d 
   ###Runs the container from the devopsdockerimage1 image.
 Before running this, go back to the docker machine, then remove the webapp.war file (because the war file will be created through the above commad in Jenkins
   rm -f webapp.war
+  ls
+the webapp.war is now deleted
 Now go back to Jenkins site, click on Build now, the build is created successfully
 To verify, go to Docker machine, run this
   docker ps -a
-you will see that the conatainer devopscontainer1 was creted and running,
-We can also verify this through the IPaddr and the port 8084
-
-
-
-
-
-
+you will see that the container devopscontainer1 was creted and running,
+We can also verify this through the IPaddr and the port 8084, slash artifact (webapp) like this: ipaddresse:8084/webapp/
+The piit website is deployed autoamtically
+#Let's the whole thing again automatically
+remove the .war file
+  rm -f webapp.war
+remove the container devopscontainer1
+  docker rm -f  devopscontainer1
+Go to Jenkins site, click DockerIntegration, then click on Configure, scroll down to Build Triggers, then select Poll SCM
+In the schedule section, type * * * * * (this means that it will ru automatically every minute), click Save
+Go to Github, HelloWorld Repo, webapp, src, index.jsp, update the h1 from Falcon to PIIT, commit
+Go back to Jenkins, a build will be triggered automatically
+in the Browser, the PIIT websit is delpoyed with the updated h1 (PIIT instead of Falcon)
 
 
 
