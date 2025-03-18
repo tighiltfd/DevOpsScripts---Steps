@@ -61,7 +61,7 @@ Rename the extracted Maven
   cd maven
   cd bin
   ./mvn -v
-mavnen is working but in oder to have it accessible from anywhere we need to set the environment variables
+maven is working but in oder to have it accessible from anywhere we need to set the environment variables
 Before that we need to make sure that java is installed:
   find / -name java
 copy /usr/lib/......x86_64 and added to the inventory
@@ -76,7 +76,7 @@ copy /usr/lib/......x86_64 and added to the inventory
 # User specific environment and startup programs
   export PATH=$PATH:$HOME/bin:$JAVA_HOME:$M2_HOME/bin
 #Save
-  $PATH
+ echo $PATH
 #The changes were not saved yet
 #exit so the changes will take effect
   exit
@@ -84,8 +84,8 @@ copy /usr/lib/......x86_64 and added to the inventory
 #Relogin to the server
 #use root
   sudo su -
-  $PATH
-#The chnages are now reflecting
+ echo $PATH
+#The changes are now reflecting
 #So, now maven can be accessible from anywhere.
 #Now, we need to integrate Jenkins with Maven
 #Go To Jenkins site, Manage Jenkins, Plugins, type maven
